@@ -446,3 +446,44 @@ input#navbar-search:focus {
   border-bottom: 2px solid var(--avia-text-primary) !important;
   background: transparent !important;
 }
+
+/* ==========================================================================
+   5. Identidade Visual AVIA (Substituicao de Logos do ERPNext e Navbar)
+   ========================================================================== */
+
+/* Substitui logotipo azul 'E' do ERPNext pelo Squircle Oficial AVIA no Dock e na tela de Apps */
+.dock-logo img[src*="erpnext"],
+.dock-logo .header-logo img,
+.shell-header .header-logo img,
+.icons-container img[src*="erpnext"],
+.icon-box img[src*="erpnext"],
+img[src*="erpnext-logo.svg"] {
+  content: url('/assets/avia_theme/images/avia_app_icon.png') !important;
+  border-radius: 14px !important;
+  width: 44px !important;
+  height: 44px !important;
+  object-fit: contain !important;
+}
+
+.icons-container .icon-card img[src*="erpnext"],
+.icons-container img[src*="erpnext"] {
+  width: 64px !important;
+  height: 64px !important;
+  border-radius: 18px !important;
+}
+
+/* Navbar Logo: Logo Preto/Grafite elegante (#181b22) em vez do verde fluorescente */
+.navbar-brand img,
+.app-logo,
+header.navbar img.app-logo {
+  content: url('/assets/avia_theme/images/avia_logo_black.png') !important;
+  max-height: 32px !important;
+  width: auto !important;
+  object-fit: contain !important;
+}
+
+/* Se houver texto no navbar-brand que ficou verde, ajusta para o tom escuro */
+.navbar-brand span {
+  color: #181b22 !important;
+}
+

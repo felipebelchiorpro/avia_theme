@@ -1,10 +1,87 @@
 /* ==========================================================================
    AVIA DESK THEME HELPER - JavaScript Bridge
-   Monta o Dock Escuro Lateral Flutuante & Tradução Dinâmica PT-BR
+   Identidade Oficial AVIA: Substitui ícones legados do ERPNext,
+   aplica logo preto elegante e monta recursos visuais de apoio.
    ========================================================================== */
 
 (function () {
   "use strict";
+
+  // 1. Intercepta e normaliza boot info e helpers do Frappe
+  function patchFrappeAppMeta() {
+    if (window.frappe && frappe.boot && Array.isArray(frappe.boot.app_data)) {
+      frappe.boot.app_data.forEach(function (app) {
+        if (app.app_name === "erpnext" || app.app_title === "ERPNext") {
+          app.app_title = "AVIA";
+          app.app_logo_url = "/assets/avia_theme/images/avia_app_icon.png";
+        }
+      });
+    }
+
+    if (window.frappe && frappe.utils && !frappe.utils._avia_patched) {
+      frappe.utils._avia_patched = true;
+      const original_app_logo = frappe.utils.app_logo;
+      frappe.utils.app_logo = function (app) {
+        if (app && (app.app_name === "erpnext" || app.app_title === "ERPNext" || app.app_title === "AVIA")) {
+          return {
+            icon: `<img src="/assets/avia_theme/images/avia_app_icon.png" alt="AVIA" style="border-radius:12px; width:100%; height:100%; object-fit:contain;" />`,
+            title: "AVIA",
+          };
+        }
+        return original_app_logo ? original_app_logo.apply(this, arguments) : null;
+      };
+    }
+  }
+
+  // 2. Substitui elementos visuais do ERPNext no DOM (cards /app, dock lateral e navbar)
+  function applyAviaBranding() {
+    // Substitui logo do topo (Navbar): troca por logo preto elegante
+    document.querySelectorAll(".navbar-brand img, .app-logo, header.navbar img.app-logo").forEach(function (img) {
+      if (!img.src.includes("avia_logo_black.png")) {
+        img.src = "/assets/avia_theme/images/avia_logo_black.png";
+        img.style.maxHeight = "32px";
+        img.style.objectFit = "contain";
+      }
+    });
+
+    // Se o navbar-brand possuir texto/HTML com cor verde legada, ajusta para o tom preto/grafite elegante
+    document.querySelectorAll(".navbar-brand span, .navbar-brand a").forEach(function (el) {
+      if (el.style && (el.style.color === "rgb(118, 255, 3)" || el.style.color === "#76FF03")) {
+        el.style.color = "#181b22";
+      }
+    });
+
+    // Substitui o ícone do ERPNext (quadrado azul com 'E') no Dock e na tela de Apps
+    document.querySelectorAll('img[src*="erpnext-logo"], img[src*="erpnext"]').forEach(function (img) {
+      if (!img.src.includes("avia_app_icon")) {
+        img.src = "/assets/avia_theme/images/avia_app_icon.png";
+        img.alt = "AVIA";
+        img.style.borderRadius = "14px";
+      }
+    });
+
+    // Substitui títulos "ERPNext" nos cards da tela de apps
+    document.querySelectorAll(".icons-container .icon-card, .icons-container .icon-box, .app-card").forEach(function (card) {
+      const title = card.querySelector(".icon-title, .app-title, span");
+      if (title && title.textContent.trim() === "ERPNext") {
+        title.textContent = "AVIA";
+      }
+    });
+
+    // Substitui logo no cabeçalho do Dock nativo do Frappe
+    document.querySelectorAll(".dock-logo .header-logo img, .shell-header .header-logo img").forEach(function (img) {
+      if (!img.src.includes("avia_app_icon")) {
+        img.src = "/assets/avia_theme/images/avia_app_icon.png";
+        img.alt = "AVIA";
+        img.style.borderRadius = "12px";
+      }
+    });
+
+    // Atualiza título da aba se contiver ERPNext
+    if (document.title.includes("ERPNext")) {
+      document.title = document.title.replace("ERPNext", "AVIA");
+    }
+  }
 
   function initAviaDock() {
     if (document.getElementById("avia-floating-dock")) return;
@@ -13,8 +90,8 @@
       dock.id = "avia-floating-dock";
       dock.innerHTML = `
         <div class="avia-dock-top">
-          <a href="/app" class="avia-dock-logo-btn" data-tooltip="AVIA Home">
-            <img src="/files/avia_icon.png" alt="AVIA" />
+          <a href="/app" class="avia-dock-logo-btn" data-tooltip="AVIA Início">
+            <img src="/assets/avia_theme/images/avia_app_icon.png" alt="AVIA" style="border-radius:10px; width:32px; height:32px;" />
           </a>
           <nav class="avia-dock-menu">
             <a href="/app/home" class="avia-dock-item active" data-tooltip="Início">
@@ -63,7 +140,6 @@
       `;
       document.body.appendChild(dock);
 
-      // Evento de clique para abrir as opções de configurações
       document.getElementById("avia-btn-settings")?.addEventListener("click", function () {
         const userDropdown = document.querySelector(".dropdown-navbar-user .dropdown-toggle");
         if (userDropdown) {
@@ -102,13 +178,11 @@
   }
 
   function applyPortugueseTranslations() {
-    // Traduz marcadores e placeholders comuns na interface do Desk
     const searchInput = document.querySelector("#navbar-search");
     if (searchInput && searchInput.placeholder && searchInput.placeholder.includes("Search")) {
       searchInput.placeholder = "Buscar no sistema ou digitar comando...";
     }
 
-    // Tradução de rótulos nos títulos de sidebar
     document.querySelectorAll(".sidebar-label, .standard-sidebar-label").forEach(function (el) {
       const txt = el.textContent.trim().toLowerCase();
       if (txt === "workspaces" || txt === "workspace") el.textContent = "ÁREAS DE TRABALHO";
@@ -120,8 +194,9 @@
     });
   }
 
-  // Observer para reaplicar conforme rotas e views mudam
   function runLoop() {
+    patchFrappeAppMeta();
+    applyAviaBranding();
     initAviaDock();
     injectUserProfileCard();
     applyPortugueseTranslations();
@@ -130,10 +205,10 @@
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", function () {
       runLoop();
-      setInterval(runLoop, 1500);
+      setInterval(runLoop, 800);
     });
   } else {
     runLoop();
-    setInterval(runLoop, 1500);
+    setInterval(runLoop, 800);
   }
 })();
