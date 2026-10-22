@@ -14,3 +14,8 @@ def boot_session(bootinfo):
 			if app.get("app_name") == "erpnext":
 				app["app_title"] = "AVIA"
 				app["app_logo_url"] = "/assets/avia_theme/images/avia_app_icon.png"
+
+	# Desativa tutoriais, tours de boas-vindas e modais de onboarding
+	bootinfo["onboarding_disabled"] = 1
+	if "user" in bootinfo and isinstance(bootinfo["user"], dict):
+		bootinfo["user"]["onboarding_status"] = "{}"
