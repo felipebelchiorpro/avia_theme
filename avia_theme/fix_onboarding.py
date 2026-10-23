@@ -1,15 +1,10 @@
 import frappe
 
-def fix_all_onboarding_links():
-    frappe.db.begin()
-    print("Limpando referências a Module Onboarding em todas as tabelas...")
-
-    for tbl in ["tabWorkspace", "tabWorkspace Sidebar"]:
-        try:
-            frappe.db.sql(f"UPDATE `{tbl}` SET module_onboarding = '' WHERE module_onboarding IS NOT NULL AND module_onboarding != ''")
-            print(f"[✓] {tbl} limpo com sucesso.")
-        except Exception as e:
-            print(f"[!] {tbl}: {e}")
-
-    frappe.db.commit()
-    print("[✓✓✓] Todas as travas de validação de Onboarding foram removidas com sucesso!")
+def verify_clean():
+    workspaces_with_onboarding = frappe.get_all("Workspace", filters={"module_onboarding": ["is", "set"]}, fields=["name", "module_onboarding"])
+    print(f"Workspaces com module_onboarding preenchido: {len(workspaces_with_onboarding)}")
+    if workspaces_with_onboarding:
+        for w in workspaces_with_onboarding:
+            print(f" - {w.name}: {w.module_onboarding}")
+    else:
+        print("[✓✓✓] PERFEITO! Nenhum Espaço de Trabalho possui mais vínculo com tutoriais/onboarding.")
